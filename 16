@@ -1,0 +1,42 @@
+import java.io.*;
+
+public class lab16 {
+    public static void main(String[] args) {
+        try {
+            FileInputStream fin = new FileInputStream("C:/16 lab/in.txt");
+            FileOutputStream fout = new FileOutputStream("C:/16 lab/out.txt");
+            int c;
+            while ((c = fin.read()) != -1) {
+                if (c != '/') {
+                    fout.write(c);
+                } else {
+                    c = fin.read();
+                    if (c == '/') {
+                        while (c != '\n' && c != -1) {
+                            c = fin.read();
+                        }
+                        if (c == '\n') {
+                            fout.write('\n');
+                        }
+                    } else if (c == '*') {
+                        while (true) {
+                            c = fin.read();
+                            if (c == -1) break;
+                            if (c == '*') {
+                                c = fin.read();
+                                if (c == '/' || c == -1) break;
+                            }
+                        }
+                    } else {
+                        fout.write('/');
+                        fout.write(c);
+                    }
+                }
+            }
+            System.out.println("Готово");
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}
