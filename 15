@@ -1,0 +1,42 @@
+import java.io.File;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.io.FileWriter;
+import java.io.IOException;
+public class laba15 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Введите ip адрес:");
+        String input = sc.nextLine();
+
+        Pattern p = Pattern.compile("(\\d|\\d\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|\\d\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|\\d\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|\\d\\d|1\\d\\d|2[0-4]\\d|25[0-5])");
+        Matcher m = p.matcher(input);
+
+        String result;
+        if (m.find()) {
+            result = "Корректный IP: " + m.group();
+            System.out.println(result);
+            writeToFile(result);
+            while (m.find()) {
+                result = "Корректный IP: " + m.group();
+                System.out.println(result);
+                writeToFile(result);
+            }
+        } else {
+            result = "Нет корректных IP адресов";
+            System.out.println(result);
+            writeToFile(result);
+        }
+    }
+
+    public static void writeToFile(String text) {
+        File dir = new File("C://lab 15");
+        File file = new File(dir, "ip.txt");
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(text + "\n");
+        } catch (IOException ex) {
+            ex.printStackTrace(System.out);
+        }
+    }
+}
