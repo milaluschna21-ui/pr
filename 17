@@ -1,0 +1,47 @@
+import java.io.*;
+import java.util.Scanner;
+
+public class laba17 {
+    public static void main(String[]args) {
+    Scanner scan = new Scanner(System.in);
+    File dir = new File("C://16 lab");
+    File filename = new File(dir, "default.txt");
+    System.out.println("дан пример y=x-sin");
+    System.out.println("введите x: ");
+    double x = scan.nextDouble();
+    Calculator calc = new Calculator();
+    calc.x=x;
+    double y = calc.calculateY();
+    double sin = Math.sin(x);
+    System.out.println("результат: "+y);
+    System.out.println("save - сохранить данные в файл" + "\n" + "upload - восстановить данные из файла");
+    String s = scan.next();
+    if(s.equals("save")){
+    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
+        oos.writeDouble(x);
+        oos.writeDouble(sin);
+        oos.writeDouble(y);
+        System.out.println("x= "+ x +", sin= "+ sin +", y= "+ y);
+    } catch (IOException e) {
+        System.out.println(e.getMessage());
+    }
+    }
+    if(s.equals("upload")){
+        try (ObjectInputStream ooos = new ObjectInputStream(new FileInputStream(filename))){
+            double x1 = ooos.readDouble();
+            double sin1 = ooos.readDouble();
+            double y1 = ooos.readDouble();
+            System.out.println("x= "+ x1 +", sin= "+ sin1 +", y= "+ y1);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    }
+    static class Calculator implements Serializable {
+        double x;
+
+        public double calculateY() {
+            return x - Math.sin(x);
+        }
+    }
+}
