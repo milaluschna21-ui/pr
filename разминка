@@ -1,0 +1,110 @@
+/////////умножение через удвоение и деление пополам
+import java.util.Scanner;
+
+public class razminka {
+
+    public static int multiply(int a, int b) {
+        int result = 0;
+
+        while (b > 0) {
+            if (b % 2 == 1) {
+                result += a;
+            }
+
+            a += a;
+            b /= 2;
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("введите первое число: ");
+        int a = scanner.nextInt();
+
+        System.out.print("введите второе число: ");
+        int b = scanner.nextInt();
+
+        int result = multiply(a, b);
+
+        System.out.println("результат: " + result);
+    }
+}
+/////////рекурсия
+import java.util.Scanner;
+
+public class razminka {
+
+    public static int multiply(int a, int b) {
+        if (b == 0) {
+            return 0;
+        }
+
+        return a + multiply(a, b - 1);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("введите первое число: ");
+        int a = scanner.nextInt();
+
+        System.out.print("введите второе число: ");
+        int b = scanner.nextInt();
+
+        System.out.println("результат: " + multiply(a, b));
+    }
+}
+///////////цикл сложения
+import java.util.Scanner;
+
+public class razminka {
+
+    public static int multiply(int a, int b) {
+        int result = 0;
+
+        for (int i = 0; i < b; i++) {
+            result = result + a;
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("введите первое число: ");
+        int a = scanner.nextInt();
+
+        System.out.print("введите второе число: ");
+        int b = scanner.nextInt();
+
+        System.out.println("результат: " + multiply(a, b));
+    }
+}
+///////
+import java.util.Scanner;
+
+public class razminka {
+
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("введите первое число: ");
+        int a = scanner.nextInt();
+
+        System.out.print("введите второе число: ");
+        int b = scanner.nextInt();
+
+        int result = 0;
+
+        for (int i = 0; i < b; i++) {
+            result = result + a;
+        }
+
+        System.out.println(a + " * " + b + " = " + result);
+    }
+}
