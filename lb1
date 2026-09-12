@@ -1,0 +1,51 @@
+import java.io.IOException;
+import java.util.Scanner;
+
+public class proces {
+
+    public static void main(String[] args) throws IOException {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Выберите процесс:");
+        System.out.println("1 - Блокнот");
+        System.out.println("2 - Калькулятор");
+        System.out.println("3 - Paint");
+
+        System.out.println("Какой процесс запустить?");
+        int vibor = scanner.nextInt();
+        scanner.nextLine();
+
+        String imyaProgrammy = "";
+
+        if (vibor == 1) {
+            imyaProgrammy = "notepad.exe";
+        } else if (vibor == 2) {
+            imyaProgrammy = "calc.exe";
+        } else if (vibor == 3) {
+            imyaProgrammy = "mspaint.exe";
+        } else {
+            System.out.println("Такого варианта нет.");
+            scanner.close();
+            return;
+        }
+
+        Process process = new ProcessBuilder(imyaProgrammy).start();
+
+        System.out.println("Процесс запущен!");
+        System.out.println("ID процесса: " + process.pid());
+        System.out.println("Процесс работает: " + process.isAlive());
+
+        System.out.println("Завершить д/н");
+        String otvet = scanner.nextLine();
+
+        if (otvet.equalsIgnoreCase("д")) {
+            process.destroy();
+            System.out.println("Процесс завершен.");
+        } else {
+            System.out.println("Процесс оставлен работать.");
+        }
+
+        scanner.close();
+    }
+}
