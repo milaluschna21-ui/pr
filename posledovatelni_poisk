@@ -1,29 +1,28 @@
-import java.util.Random;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class poisk {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
         final int KOLICHESTVO = 1000;
-        final int MAX = 10000;
         final int DELITEL = 14;
 
-        Random random = new Random();
+        Scanner scanner = new Scanner(
+                new File("C:\\Users\\Пользователь\\Downloads\\Посл поиск.txt")
+        );
 
         int luchsheeProizvedenie = -1;
         int samoeBolshoe = -1;
         int vtoroeBolshoe = -1;
 
-        System.out.println("Сгенерированная последовательность:");
-
         for (int nomer = 0; nomer < KOLICHESTVO; nomer++) {
 
-            int vvedennoe = random.nextInt(MAX + 1);
+            int chislo = scanner.nextInt();
 
-            System.out.print(vvedennoe + " ");
-
-            if (vvedennoe % DELITEL == 0) {
+            if (chislo % DELITEL == 0) {
                 if (vtoroeBolshoe != -1) {
-                    int proizvedenie = vvedennoe * vtoroeBolshoe;
+                    int proizvedenie = chislo * vtoroeBolshoe;
 
                     if (proizvedenie > luchsheeProizvedenie) {
                         luchsheeProizvedenie = proizvedenie;
@@ -31,9 +30,9 @@ public class poisk {
                 }
             }
 
-            if (vvedennoe % 7 == 0) {
+            if (chislo % 7 == 0) {
                 if (samoeBolshoe != -1) {
-                    int proizvedenie = vvedennoe * samoeBolshoe;
+                    int proizvedenie = chislo * samoeBolshoe;
 
                     if (proizvedenie % DELITEL == 0 &&
                             proizvedenie > luchsheeProizvedenie) {
@@ -42,14 +41,16 @@ public class poisk {
                 }
             }
 
-            if (vvedennoe > samoeBolshoe) {
+            if (chislo > samoeBolshoe) {
                 vtoroeBolshoe = samoeBolshoe;
-                samoeBolshoe = vvedennoe;
-            } else if (vvedennoe > vtoroeBolshoe) {
-                vtoroeBolshoe = vvedennoe;
+                samoeBolshoe = chislo;
+            } else if (chislo > vtoroeBolshoe) {
+                vtoroeBolshoe = chislo;
             }
         }
 
-        System.out.println("\n\nРезультат: " + luchsheeProizvedenie);
+        scanner.close();
+
+        System.out.println("Результат: " + luchsheeProizvedenie);
     }
 }
