@@ -1,0 +1,55 @@
+import java.util.Random;
+
+public class poisk {
+    public static void main(String[] args) {
+
+        final int KOLICHESTVO = 1000;
+        final int MAX = 10000;
+        final int DELITEL = 14;
+
+        Random random = new Random();
+
+        int luchsheeProizvedenie = -1;
+        int samoeBolshoe = -1;
+        int vtoroeBolshoe = -1;
+
+        System.out.println("Сгенерированная последовательность:");
+
+        for (int nomer = 0; nomer < KOLICHESTVO; nomer++) {
+
+            int vvedennoe = random.nextInt(MAX + 1);
+
+            System.out.print(vvedennoe + " ");
+
+            if (vvedennoe % DELITEL == 0) {
+                if (vtoroeBolshoe != -1) {
+                    int proizvedenie = vvedennoe * vtoroeBolshoe;
+
+                    if (proizvedenie > luchsheeProizvedenie) {
+                        luchsheeProizvedenie = proizvedenie;
+                    }
+                }
+            }
+
+            if (vvedennoe % 7 == 0) {
+                if (samoeBolshoe != -1) {
+                    int proizvedenie = vvedennoe * samoeBolshoe;
+
+                    if (proizvedenie % DELITEL == 0 &&
+                            proizvedenie > luchsheeProizvedenie) {
+                        luchsheeProizvedenie = proizvedenie;
+                    }
+                }
+            }
+
+            if (vvedennoe > samoeBolshoe) {
+                vtoroeBolshoe = samoeBolshoe;
+                samoeBolshoe = vvedennoe;
+            } else if (vvedennoe > vtoroeBolshoe) {
+                vtoroeBolshoe = vvedennoe;
+            }
+        }
+
+        System.out.println("\n\nРезультат: " + luchsheeProizvedenie);
+    }
+}
