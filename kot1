@@ -1,0 +1,15 @@
+import java.util.Scanner
+fun main() {
+    println("введите число n")
+    val s = Scanner(System.`in`)
+    val n = s.nextInt()
+    println("введите значение x")
+    val x = s.nextDouble()
+    if (x <= 2 && x > 0) {
+        var result = 0.0
+        for (i in 0..n) {
+            result += Math.pow(-1.0, i.toDouble()) * Math.pow(x - 1, (i + 1).toDouble()) / (i + 1)
+        }
+        println("результат: $result")
+    }
+}
