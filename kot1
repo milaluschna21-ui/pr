@@ -10,6 +10,9 @@ fun main() {
         for (i in 0..n) {
             result += Math.pow(-1.0, i.toDouble()) * Math.pow(x - 1, (i + 1).toDouble()) / (i + 1)
         }
-        println("результат: $result")
+        println("результат:" + result)
+    }
+    else {
+        println("x должно быть больше 0 и меньше или равно 2")
     }
 }
