@@ -1,0 +1,48 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class poisk2 {
+    public static void main(String[] args) throws FileNotFoundException {
+        final int KOLICHESTVO = 1000;
+        Scanner scanner = new Scanner(
+                new File("C:\\Users\\Пользователь\\Downloads\\1111.txt")
+        );
+        int[] chisla = new int[KOLICHESTVO];
+        int minimalnoe37 = 10001;
+        int maksimalnoe73 = 0;
+        for (int i = 0; i < KOLICHESTVO; i++) {
+            chisla[i] = scanner.nextInt();
+            if (chisla[i] % 37 == 0 && chisla[i] < minimalnoe37) {
+                minimalnoe37 = chisla[i];
+            }
+            if (chisla[i] % 73 == 0 && chisla[i] > maksimalnoe73) {
+                maksimalnoe73 = chisla[i];
+            }
+        }
+        int niz = Math.min(minimalnoe37, maksimalnoe73);
+        int verh = Math.max(minimalnoe37, maksimalnoe73);
+        int kolichestvoPar = 0;
+        int minimalnayaSumma = 100000;
+        for (int i = 0; i < KOLICHESTVO - 1; i++) {
+            boolean pervoeVnutri =
+                    chisla[i] > niz &&
+                            chisla[i] < verh;
+            boolean vtoroeVnutri =
+                    chisla[i + 1] > niz &&
+                            chisla[i + 1] < verh;
+            if (pervoeVnutri != vtoroeVnutri) {
+
+                kolichestvoPar++;
+
+                int summa = chisla[i] + chisla[i + 1];
+
+                if (summa < minimalnayaSumma) {
+                    minimalnayaSumma = summa;
+                }
+            }
+        }
+        System.out.println("Количество пар: " + kolichestvoPar);
+        System.out.println("Минимальная сумма: " + minimalnayaSumma);
+    }
+}
