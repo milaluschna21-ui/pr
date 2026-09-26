@@ -1,0 +1,98 @@
+public class RabbitAndTurtle {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        // Создаем двух животных.
+        // Кролик начинает с большим приоритетом.
+        AnimalThread rabbit = new AnimalThread("Кролик", 7);
+
+        // Черепаха начинает с меньшим приоритетом.
+        AnimalThread turtle = new AnimalThread("Черепаха", 3);
+
+        System.out.println("Начинается гонка!");
+
+        // Запускаем потоки.
+        rabbit.start();
+        turtle.start();
+
+        // Даем животным немного времени побежать.
+        Thread.sleep(1000);
+
+        System.out.println();
+        System.out.println("Сейчас:");
+        System.out.println("Кролик: " + rabbit.getMetry() + " м");
+        System.out.println("Черепаха: " + turtle.getMetry() + " м");
+
+        System.out.println();
+        System.out.println("Черепаха отстает!");
+        System.out.println("Меняем приоритеты...");
+
+        // Повышаем приоритет Черепахи.
+        turtle.setPriority(10);
+
+        // Понижаем приоритет Кролика.
+        rabbit.setPriority(2);
+
+        System.out.println("Приоритет Кролика: " + rabbit.getPriority());
+        System.out.println("Приоритет Черепахи: " + turtle.getPriority());
+
+        // Ждем, пока оба потока закончат работу.
+        rabbit.join();
+        turtle.join();
+
+        System.out.println();
+        System.out.println("Гонка закончена!");
+        System.out.println("Кролик: " + rabbit.getMetry() + " м");
+        System.out.println("Черепаха: " + turtle.getMetry() + " м");
+    }
+}
+
+
+// Класс животного, который расширяет Thread
+class AnimalThread extends Thread {
+
+    // Имя животного
+    private String imya;
+
+    // Приоритет потока
+    private int prioritet;
+
+    // Сколько метров прошло животное
+    private int metry = 0;
+
+    // Конструктор получает имя и приоритет
+    AnimalThread(String imya, int prioritet) {
+        this.imya = imya;
+        this.prioritet = prioritet;
+
+        setName(imya);
+        setPriority(prioritet);
+    }
+
+    // Код, который выполняется в потоке
+    @Override
+    public void run() {
+
+        // Животное должно пройти 100 метров
+        while (metry < 100) {
+
+            metry++;
+
+            System.out.println(imya + " - " + metry + " м");
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                System.out.println(imya + " остановлен");
+                return;
+            }
+        }
+
+        System.out.println(imya + " финишировал!");
+    }
+
+    // Возвращаем пройденное расстояние
+    public int getMetry() {
+        return metry;
+    }
+}
