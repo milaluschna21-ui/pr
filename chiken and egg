@@ -1,0 +1,24 @@
+public class chiken {
+    static String last = ""; // Здесь храним последнее слово
+    public static void main(String[] args) throws InterruptedException {
+        Thread chicken = new Thread(() -> { // Создаём поток "Курица"
+            for (int i = 0; i < 5; i++) { // Повторяем 5 раз
+                System.out.println("Курица"); // Выводим "Курица"
+                last = "Курица"; // Запоминаем, что последней была курица
+            }
+        });
+        Thread egg = new Thread(() -> { // Создаём поток "Яйцо"
+            for (int i = 0; i < 5; i++) { // Повторяем 5 раз
+                System.out.println("Яйцо"); // Выводим "Яйцо"
+                last = "Яйцо"; // Запоминаем, что последним было яйцо
+            }
+        });
+        chicken.start(); // Запускаем поток с курицей
+        egg.start(); // Запускаем поток с яйцом
+        while (chicken.isAlive() || egg.isAlive()) { // Проверяем, работают ли ещё потоки
+        }
+        chicken.join(); // Ждём, пока курица закончит
+        egg.join(); // Ждём, пока яйцо закончит
+        System.out.println("Спор окончен. Победила " + last); // Выводим победителя
+    }
+}
