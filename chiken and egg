@@ -1,27 +1,28 @@
 public class chiken {
     static String last = ""; // Здесь храним последнее слово
-    static Object lock = new Object(); // Объект для синхронизации
-    public static void main(String[] args) throws InterruptedException {
+    public static synchronized void chicken() { // Метод для курицы с синхронизацией
+        System.out.println("Курица"); // Выводим слово "Курица"
+        last = "Курица"; // Запоминаем последнее слово
+    }
+    public static synchronized void egg() { // Метод для яйца с синхронизацией
+        System.out.println("Яйцо"); // Выводим слово "Яйцо"
+        last = "Яйцо"; // Запоминаем последнее слово
+    }
+    public static void main(String[] args) throws InterruptedException { // Главный метод программы
         Thread chicken = new Thread(() -> { // Создаём поток "Курица"
-            synchronized (lock) { // Синхронизация потока
-                for (int i = 0; i < 5; i++) { // Повторяем 5 раз
-                    System.out.println("Курица"); // Выводим "Курица"
-                    last = "Курица"; // Запоминаем последнее слово
-                }
+            for (int i = 0; i < 5; i++) { // Повторяем 5 раз
+                chiken.chicken(); // Вызываем метод курицы
             }
         });
         Thread egg = new Thread(() -> { // Создаём поток "Яйцо"
-            synchronized (lock) { // Синхронизация потока
-                for (int i = 0; i < 5; i++) { // Повторяем 5 раз
-                    System.out.println("Яйцо"); // Выводим "Яйцо"
-                    last = "Яйцо"; // Запоминаем последнее слово
-                }
+            for (int i = 0; i < 5; i++) { // Повторяем 5 раз
+                chiken.egg(); // Вызываем метод яйца
             }
         });
-        chicken.start(); // Запускаем поток с курицей
-        egg.start(); // Запускаем поток с яйцом
-        chicken.join(); // Ждём, пока курица закончит
-        egg.join(); // Ждём, пока яйцо закончит
-        System.out.println("Спор окончен. Победила " + last); // Выводим победителя
+        chicken.start(); // Запускаем поток курицы
+        egg.start(); // Запускаем поток яйца
+        chicken.join(); // Ждём завершения потока курицы
+        egg.join(); // Ждём завершения потока яйца
+        System.out.println("Спор окончен. Победила " + last); // Выводим последнее слово
     }
 }
