@@ -1,0 +1,48 @@
+import java.util.Scanner; // Подключаем сканер для ввода с клавиатуры
+
+public class chokolat {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in); // Создаем объект для чтения ввода
+
+        // Спрашиваем у пользователя данные
+        System.out.print("Введите бюджет: ");
+        int budget = in.nextInt();
+
+        System.out.print("Введите цену одной шоколадки: ");
+        int price = in.nextInt();
+
+        System.out.print("Введите k (за сколько купленных дают 1): ");
+        int k = in.nextInt();
+
+        System.out.print("Введите m (за сколько фантиков дают 1): ");
+        int m = in.nextInt();
+
+        // покупаем шоколадки на все деньги
+        int bought = budget / price;
+        int total = bought;     // всего шоколадок
+        int wrappers = bought;  // фантики от съеденных купленных
+
+        // до тех пор пока можем получить хоть что-то бесплатно
+        while (wrappers >= m || bought >= k) {
+
+            // купленные шоколадки
+            if (bought >= k) {
+                int free = bought / k;      // сколько бесплатных дадут
+                total += free;              // съедаем их
+                wrappers += free;           // получаем фантики с них
+                bought = bought % k;        // оставляем остаток купленных
+            }
+
+            // фантики
+            if (wrappers >= m) {
+                int free = wrappers / m;                // сколько шоколадок выменяли
+                total += free;                          // съедаем
+                wrappers = (wrappers % m) + free;       // остаток фантиков, новые фантики
+            }
+        }
+
+        System.out.println("Всего шоколадок: " + total);
+
+        in.close(); // Закрываем сканер (хороший тон)
+    }
+}
