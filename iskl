@@ -1,0 +1,59 @@
+import java.util.Scanner;
+
+//создаю собственное исключение
+class EmptyWordException extends Exception {
+    public EmptyWordException(String message) {
+        super(message);
+    }
+}
+public class iskl {
+    // метод проверки на палиндром (перевернутая строка)
+    public static boolean isPalindrome(String word) {
+        String reversed = "";
+        for (int i = word.length() - 1; i >= 0; i--) {
+            reversed = reversed + word.charAt(i);
+        }
+        return word.equals(reversed);
+    }
+    // метод для ввода слова с проверкой на пустоту
+    // используем исключение
+    public static String readWord(Scanner scanner, String prompt) throws EmptyWordException {
+        System.out.print(prompt);
+        String word = scanner.nextLine();
+        if (word.isEmpty()) {
+            throw new EmptyWordException("Слово не может быть пустым.");
+        }
+        return word;
+    }
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            String word1 = readWord(scanner, "Введите первое слово: ");
+            String word2 = readWord(scanner, "Введите второе слово: ");
+            String word3 = readWord(scanner, "Введите третье слово: ");
+            // если все слова введены успешно, проверяем их
+            boolean found = false;
+            if (isPalindrome(word1)) {
+                System.out.println("Слово " + word1 + " — палиндром");
+                found = true;
+            }
+            if (isPalindrome(word2)) {
+                System.out.println("Слово " + word2 + " — палиндром");
+                found = true;
+            }
+            if (isPalindrome(word3)) {
+                System.out.println("Слово " + word3 + " — палиндром");
+                found = true;
+            }
+            if (!found) {
+                System.out.println("Ни одно из слов не является палиндромом.");
+            }
+        } catch (EmptyWordException e) {
+            // работает исключение
+            System.out.println("Ошибка: " + e.getMessage());
+        } finally {
+            scanner.close();
+        }
+    }
+}
