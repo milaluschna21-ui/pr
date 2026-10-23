@@ -76,48 +76,44 @@ class InterferenceExample {
 
 //БЕЗ ПОТЕРИ РЕЗУЛЬТАТА
 import java.util.concurrent.atomic.AtomicInteger;
-
-// Главный класс, с которого начинается программа
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        // Запускаем основной пример
         new InterferenceExample().example();
     }
 }
 
-// Класс для работы с потоками
+// класс для работы с потоками
 class InterferenceThread extends Thread {
-    // Объект, который проверяет, пора ли останавливать потоки
+    // объект, который проверяет, пора ли останавливать потоки
     private final InterferenceExample checker;
-    // Общая переменная, которую изменяют оба потока
+    // общая переменная, которую изменяют оба потока
     private static int i;
 
-    // Получаем объект для проверки остановки
+    // получаем объект для проверки остановки
     InterferenceThread(InterferenceExample checker) {
         this.checker = checker;
     }
 
-    // Увеличиваем общую переменную на единицу
-    // ВОТ ОНА, НАША ОДНА СТРОКА (добавлено synchronized):
+    // увеличиваем общую переменную на единицу
     private synchronized void increment() {
         i++;
     }
 
-    // Возвращаем текущее значение переменной i
+    // возвращаем текущее значение переменной i
     int getI() {
         return i;
     }
 
-    // Этот метод выполняется при запуске потока
+    // этот метод выполняется при запуске потока
     public void run() {
-        // Работаем, пока метод stop() не скажет остановиться
+        // работаем, пока метод stop() не скажет остановиться
         while (!checker.stop()) {
             increment();
         }
     }
 }
 
-// Класс, который запускает потоки и проверяет их работу
+// класс, который запускает потоки и проверяет их работу
 class InterferenceExample {
     // количество проверок, после которого потоки остановятся
     private static final int HUNDRED_MILLION = 100_000_000;
