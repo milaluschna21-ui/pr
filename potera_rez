@@ -1,0 +1,74 @@
+import java.util.concurrent.atomic.AtomicInteger;
+// Главный класс, с которого начинается программа
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+
+        // Запускаем основной пример
+        new InterferenceExample().example();
+    }
+}
+// Класс для работы с потоками
+class InterferenceThread extends Thread {
+    // Объект, который проверяет, пора ли останавливать потоки
+    private final InterferenceExample checker;
+    // Общая переменная, которую изменяют оба потока
+    private static int i;
+    // Получаем объект для проверки остановки
+    InterferenceThread(InterferenceExample checker) {
+        this.checker = checker;
+    }
+    // Увеличиваем общую переменную на единицу
+    private void increment() {
+        i++;
+        // Здесь может теряться результат.
+        // Например, i равна 5.
+        // Первый поток читает 5, и второй тоже читает 5.
+        // Оба прибавляют 1 и записывают 6.
+        // Получается 6 вместо 7.
+        // Так происходит, потому что потоки одновременно
+        // изменяют одну переменную и могут перезаписать результат.
+    }
+    // Возвращаем текущее значение переменной i
+    int getI() {
+        return i;
+    }
+    // Этот метод выполняется при запуске потока
+    public void run() {
+        // Работаем, пока метод stop() не скажет остановиться
+        while (!checker.stop()) {
+            increment();
+        }
+    }
+}
+// Класс, который запускает потоки и проверяет их работу
+class InterferenceExample {
+    // Количество проверок, после которого потоки остановятся
+    private static final int HUNDRED_MILLION = 100_000_000;
+    // Счётчик, который безопасно увеличивается несколькими потоками
+    private AtomicInteger counter = new AtomicInteger();
+    // Проверяем, пора ли останавливать потоки
+    boolean stop() {
+        // Увеличиваем счётчик и проверяем, превысил ли он 100 миллионов
+        return counter.incrementAndGet() > HUNDRED_MILLION;
+    }
+    // Запускаем потоки и выводим результат
+    void example() throws InterruptedException {
+        // Создаём два потока
+        InterferenceThread thread1 = new InterferenceThread(this);
+        InterferenceThread thread2 = new InterferenceThread(this);
+        // Запускаем первый и второй потоки
+        thread1.start();
+        thread2.start();
+        // Ждём завершения обоих потоков
+        thread1.join();
+        thread2.join();
+        // Выводим ожидаемое значение
+        System.out.println("Expected: " + HUNDRED_MILLION);
+        // Выводим реальное значение
+        System.out.println("Result: " + thread1.getI());
+        // Результат может быть меньше ожидаемого,
+        // потому что оба потока одновременно увеличивают i.
+        // Иногда один поток перезаписывает результат другого.
+        // AtomicInteger защищает counter, но не переменную i.
+    }
+}
