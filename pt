@@ -1,0 +1,104 @@
+
+import java.util.ArrayList; 
+import java.util.Random; 
+
+public class pt {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        int count = 100000; // Количество чисел
+        int threadCount = 4; // Количество потоков
+
+        ArrayList<Integer> numbers = new ArrayList<>(); // Создаём список чисел
+        Random random = new Random(); // Создаём генератор случайных чисел
+
+        // Заполняем список случайными числами
+        for (int i = 0; i < count; i++) {
+            numbers.add(random.nextInt(100)); // Добавляем число от 0 до 99
+        }
+
+        // Обычное сложение всех чисел
+        long start = System.nanoTime(); // Запоминаем время начала
+
+        long simpleSum = 0; // Переменная для общей суммы
+
+        for (int number : numbers) { // Берём числа по очереди
+            simpleSum += number; // Прибавляем число к сумме
+        }
+
+        long end = System.nanoTime(); // Запоминаем время окончания
+
+        long simpleTime = (end - start) / 1000; // Считаем время в микросекундах
+
+        // Создаём массив для сумм четырёх потоков
+        long[] sums = new long[threadCount];
+
+        // Создаём массив для самих потоков
+        Thread[] threads = new Thread[threadCount];
+
+        // Сколько чисел будет обрабатывать каждый поток
+        int partSize = count / threadCount;
+
+        // Запоминаем начало параллельного сложения
+        long parallelStart = System.nanoTime();
+
+        // Создаём четыре потока
+        for (int i = 0; i < threadCount; i++) {
+
+            int number = i; // Запоминаем номер потока
+
+            int startIndex = i * partSize; // Начало его части
+            int endIndex = startIndex + partSize; // Конец его части
+
+            // Создаём поток
+            threads[i] = new Thread(() -> {
+
+                long sum = 0; // Сумма чисел этого потока
+
+                // Складываем числа своей части
+                for (int j = startIndex; j < endIndex; j++) {
+                    sum += numbers.get(j); // Прибавляем очередное число
+                }
+
+                sums[number] = sum; // Сохраняем результат потока
+            });
+
+            threads[i].start(); // Запускаем поток
+        }
+
+        // Ждём, пока все четыре потока закончат работу
+        for (int i = 0; i < threadCount; i++) {
+            threads[i].join(); // Ждём завершения потока
+        }
+
+        // Складываем результаты всех потоков
+        long parallelSum = 0;
+
+        for (int i = 0; i < threadCount; i++) {
+            parallelSum += sums[i]; // Добавляем сумму очередного потока
+        }
+
+        // Запоминаем конец параллельного сложения
+        long parallelEnd = System.nanoTime();
+
+        // Считаем время в микросекундах
+        long parallelTime = (parallelEnd - parallelStart) / 1000;
+
+        // Выводим результаты программы
+        System.out.println("Количество чисел: " + count);
+        System.out.println("Количество потоков: " + threadCount);
+
+        System.out.println("Обычная сумма: " + simpleSum);
+        System.out.println("Время обычного сложения: " + simpleTime + " мкс");
+
+        System.out.println("Сумма четырёх потоков: " + parallelSum);
+        System.out.println("Время работы потоков: " + parallelTime + " мкс");
+
+        // Проверяем, одинаковые ли получились суммы
+        if (simpleSum == parallelSum) {
+            System.out.println("Суммы совпадают");
+        } else {
+            System.out.println("Суммы не совпадают");
+        }
+    }
+}
