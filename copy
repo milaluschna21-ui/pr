@@ -1,0 +1,66 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+public class copy {
+
+    // копируем файл способом из статьи (Files.copy)
+    public static void copy(String from, String to) throws IOException {
+        Path src = Paths.get(from);
+        Path dst = Paths.get(to);
+        Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("Скопировали " + from + " в " + to);
+    }
+
+    public static void main(String[] args) throws Exception {
+        // файлы
+        String f1 = "file1.txt";
+        String f2 = "file2.txt";
+        String d1 = "copy1.txt";
+        String d2 = "copy2.txt";
+
+        // последовательное копирование
+        System.out.println("Последовательно:");
+        long start1 = System.currentTimeMillis();
+        copy(f1, d1);
+        copy(f2, d2);
+        long end1 = System.currentTimeMillis();
+        System.out.println("Время: " + (end1 - start1) + " мс");
+        System.out.println();
+
+        // параллельное копирование через потоки
+        System.out.println("Параллельно:");
+        long start2 = System.currentTimeMillis();
+
+        Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    copy(f1, d1);
+                } catch (IOException e) {
+                    System.out.println("Ошибка " + e);
+                }
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    copy(f2, d2);
+                } catch (IOException e) {
+                    System.out.println("Ошибка " + e);
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        long end2 = System.currentTimeMillis();
+        System.out.println("Время: " + (end2 - start2) + " мс");
+    }
+}
