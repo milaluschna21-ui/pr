@@ -83,12 +83,18 @@ public class Main {
     private static final Path LINKS_FILE = BASE_DIR.resolve("ssylki.txt");
 
     private static final String[] TRACK_URLS = {
-            "https://kaino.dev/api/library/music/hip-hop-07/download?format=mp3",
-            "https://kaino.dev/api/library/music/hip-hop-09/download?format=mp3",
-            "https://kaino.dev/api/library/music/hip-hop-01/download?format=mp3",
-            "https://kaino.dev/api/library/music/hip-hop-03/download?format=mp3"
+            "https://kaino.dev/api/library/music/chiptune-05/download?format=mp3",
+            "https://kaino.dev/api/library/music/acoustic-folk-05/download?format=mp3",
+            "https://kaino.dev/api/library/music/acoustic-folk-07/download?format=mp3",
+            "https://kaino.dev/api/library/music/chiptune-07/download?format=mp3"
     };
-    private static final String[] TRACK_NAMES = {"hiphop07.mp3", "hiphop09.mp3", "hiphop01.mp3", "hiphop03.mp3"};
+    
+    private static final String[] TRACK_NAMES = {
+            "chiptune_05.mp3", 
+            "acoustic_folk_05.mp3", 
+            "acoustic_folk_07.mp3", 
+            "chiptune_07.mp3"
+    };
 
     public static void main(String[] args) {
         try {
@@ -108,12 +114,12 @@ public class Main {
         try (Scanner scanner = new Scanner(System.in)) {
             boolean running = true;
             while (running) {
-                System.out.println("\n=== МЕНЮ ===");
+                System.out.println("\nМЕНЮ");
                 System.out.println("1. Скачать всю музыку");
-                System.out.println("2. Скачать и открыть Hip Hop 07");
-                System.out.println("3. Скачать и открыть Hip Hop 09");
-                System.out.println("4. Скачать и открыть Hip Hop 01");
-                System.out.println("5. Скачать и открыть Hip Hop 03");
+                System.out.println("2. Скачать и открыть Chiptune 05");
+                System.out.println("3. Скачать и открыть Acoustic Folk 05");
+                System.out.println("4. Скачать и открыть Acoustic Folk 07");
+                System.out.println("5. Скачать и открыть Chiptune 07");
                 System.out.println("6. Показать информацию о процессах");
                 System.out.println("0. Выход");
                 System.out.print("Ваш выбор: ");
