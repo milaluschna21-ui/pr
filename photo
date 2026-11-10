@@ -1,0 +1,186 @@
+import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class photo {
+
+    private static final Path PAPKA   = Paths.get(System.getProperty("user.home"), "Documents", "Lab");
+    private static final Path FAIL    = PAPKA.resolve("inFile1.txt");
+    private static final Path KARTINKI = PAPKA.resolve("images");
+
+    private static final String FOTO1 =
+            "https://i.pinimg.com/736x/ef/8f/b3/ef8fb37244ac949153931d82188e026d.jpg";
+    private static final String FOTO2 =
+            "https://i.pinimg.com/736x/11/ae/57/11ae57b0625e69ee5a1d3fdb13d57a91.jpg";
+    private static final String FOTO3 =
+            "https://i.pinimg.com/736x/9d/ab/7a/9dab7a3c82403f7943e052e49714d6d8.jpg";
+
+    private static final HttpClient ZAGRUZCHIK = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+
+    private static final List<Process> SPISOK_PROCCESSOV = new ArrayList<>();
+
+    public static void main(String[] args) {
+        try {
+            Files.createDirectories(PAPKA);
+            Files.createDirectories(KARTINKI);
+
+            // создаём файл со ссылками только если его ещё нет
+            if (!Files.exists(FAIL)) {
+                sozdatFail();
+            }
+
+            try (Scanner vvod = new Scanner(System.in)) {
+                while (true) {
+                    System.out.println("\nМЕНЮ");
+                    System.out.println("1. Скачать все картинки");
+                    System.out.println("2. Скачать одну картинку");
+                    System.out.println("3. Открыть скачанные картинки");
+                    System.out.println("4. Показать информацию о процессах");
+                    System.out.println("5. Выход");
+                    System.out.print("Выберите действие: ");
+
+                    int vibor;
+                    try {
+                        vibor = Integer.parseInt(vvod.nextLine().trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Введите число!");
+                        continue;
+                    }
+
+                    switch (vibor) {
+                        case 1 -> skachatVse();
+                        case 2 -> {
+                            System.out.print("Введите номер картинки (1-3): ");
+                            int nomer;
+                            try {
+                                nomer = Integer.parseInt(vvod.nextLine().trim());
+                            } catch (NumberFormatException e) {
+                                System.out.println("Введите число!");
+                                break;
+                            }
+                            if (nomer >= 1 && nomer <= 3) {
+                                String[] ssylki = {FOTO1, FOTO2, FOTO3};
+                                zagruzitFail(ssylki[nomer - 1], nomer);
+                            } else {
+                                System.out.println("Неверный номер!");
+                            }
+                        }
+                        case 3 -> otkrytKartinku();
+                        case 4 -> pokazatInfo();
+                        case 5 -> {
+                            System.out.println("Программа завершена.");
+                            return;
+                        }
+                        default -> System.out.println("Такого пункта нет!");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+    }
+
+    private static void sozdatFail() throws IOException {
+        try (BufferedWriter zapis = Files.newBufferedWriter(FAIL)) {
+            zapis.write(FOTO1); zapis.newLine();
+            zapis.write(FOTO2); zapis.newLine();
+            zapis.write(FOTO3); zapis.newLine();
+        }
+        System.out.println("Файл со ссылками создан: " + FAIL);
+    }
+
+    private static void skachatVse() {
+        try (BufferedReader chtenie = Files.newBufferedReader(FAIL)) {
+            String ssylka;
+            int nomer = 1;
+            while ((ssylka = chtenie.readLine()) != null) {
+                if (!ssylka.isBlank()) {
+                    zagruzitFail(ssylka.trim(), nomer);
+                    nomer++;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Ошибка чтения файла: " + e.getMessage());
+        }
+    }
+
+    private static void zagruzitFail(String ssylka, int nomer) {
+        try {
+            HttpRequest zapros = HttpRequest.newBuilder()
+                    .uri(URI.create(ssylka))
+                    .timeout(Duration.ofSeconds(30))
+                    .GET()
+                    .build();
+
+            HttpResponse<byte[]> otvet = ZAGRUZCHIK.send(
+                    zapros, HttpResponse.BodyHandlers.ofByteArray());
+
+            String contentType = otvet.headers().firstValue("Content-Type").orElse("не указан");
+            System.out.println("\nHTTP Status: " + otvet.statusCode());
+            System.out.println("Content-Type: " + contentType);
+            System.out.println("Размер: " + otvet.body().length + " байт");
+
+            if (otvet.statusCode() == 200 && contentType.startsWith("image/")) {
+                Path put = KARTINKI.resolve("image_" + nomer + ".jpg");
+                Files.write(put, otvet.body());
+                System.out.println("Картинка сохранена: " + put);
+            } else {
+                System.out.println("Не удалось скачать изображение (не 200 или не image/*).");
+            }
+        } catch (Exception e) {
+            System.out.println("Ошибка загрузки: " + e.getMessage());
+        }
+    }
+
+    private static void otkrytKartinku() {
+        boolean found = false;
+        for (int i = 1; i <= 3; i++) {
+            Path kartinka = KARTINKI.resolve("image_" + i + ".jpg");
+            if (Files.exists(kartinka)) {
+                found = true;
+                try {
+                    Process process = new ProcessBuilder(
+                            "cmd.exe", "/c", "start", "", kartinka.toAbsolutePath().toString()
+                    ).start();
+                    SPISOK_PROCCESSOV.add(process);
+                    System.out.println("Открыта картинка " + i +
+                            " (PID: " + process.pid() + ")");
+                } catch (Exception e) {
+                    System.out.println("Ошибка открытия: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Картинка " + i + " не найдена. Сначала скачайте её (пункт 1).");
+            }
+        }
+        if (!found) {
+            System.out.println("Скачанных картинок нет — сначала выполните пункт 1.");
+        }
+    }
+
+    private static void pokazatInfo() {
+        SPISOK_PROCCESSOV.removeIf(p -> !p.isAlive());
+
+        if (SPISOK_PROCCESSOV.isEmpty()) {
+            System.out.println("Активных процессов просмотра нет.");
+            return;
+        }
+        for (Process process : SPISOK_PROCCESSOV) {
+            System.out.println("\nPID: " + process.pid());
+            System.out.println("Процесс активен: " + process.isAlive());
+            process.info().command().ifPresent(
+                    command -> System.out.println("Команда: " + command));
+        }
+    }
+}
