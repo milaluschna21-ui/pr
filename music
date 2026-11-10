@@ -1,0 +1,197 @@
+import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class MusicDownloader {
+    private final Path musicDir;
+    private final HttpClient httpClient;
+
+    public MusicDownloader(Path musicDir) {
+        this.musicDir = musicDir;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
+    }
+
+    public void downloadTrack(String url, String fileName) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0")
+                .timeout(Duration.ofSeconds(30))
+                .GET()
+                .build();
+
+        HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+
+        if (response.statusCode() == 200) {
+            Path savePath = musicDir.resolve(fileName);
+            Files.write(savePath, response.body());
+            System.out.println("Успешно скачан: " + fileName + " (" + response.body().length + " байт)");
+        } else {
+            throw new IOException("Сервер вернул код: " + response.statusCode());
+        }
+    }
+}
+
+class ProcessManager {
+    private Process activePlayer;
+    private String currentTrackName;
+    private final List<Long> pidHistory = new ArrayList<>();
+
+    public void launchPlayer(Path audioPath, String trackName) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(
+                "cmd.exe", "/c", "start", "", audioPath.toAbsolutePath().toString()
+        );
+        this.activePlayer = pb.start();
+        this.currentTrackName = trackName;
+        this.pidHistory.add(activePlayer.pid());
+        System.out.println("Запущен плеер для: " + trackName);
+    }
+
+    public void displaySystemInfo() {
+        System.out.println("\n--- СИСТЕМНАЯ ИНФОРМАЦИЯ ---");
+        
+        if (activePlayer != null) {
+            System.out.println("Текущий трек: " + currentTrackName);
+            System.out.println("PID плеера: " + activePlayer.pid());
+            System.out.println("Плеер запущен: " + activePlayer.isAlive());
+        } else {
+            System.out.println("Плеер еще не запускался.");
+        }
+
+        ProcessHandle self = ProcessHandle.current();
+        System.out.println("PID текущей программы: " + self.pid());
+        System.out.println("Программа работает: " + self.isAlive());
+        System.out.println("Запущено дочерних процессов: " + self.children().count());
+        System.out.println("История PID плееров: " + pidHistory);
+    }
+}
+
+public class Main {
+    private static final Path BASE_DIR = Paths.get(System.getProperty("user.home"), "Documents", "MusicLab");
+    private static final Path AUDIO_DIR = BASE_DIR.resolve("audio");
+    private static final Path LINKS_FILE = BASE_DIR.resolve("ssylki.txt");
+
+    private static final String[] TRACK_URLS = {
+            "https://kaino.dev/api/library/music/hip-hop-07/download?format=mp3",
+            "https://kaino.dev/api/library/music/hip-hop-09/download?format=mp3",
+            "https://kaino.dev/api/library/music/hip-hop-01/download?format=mp3",
+            "https://kaino.dev/api/library/music/hip-hop-03/download?format=mp3"
+    };
+    private static final String[] TRACK_NAMES = {"hiphop07.mp3", "hiphop09.mp3", "hiphop01.mp3", "hiphop03.mp3"};
+
+    public static void main(String[] args) {
+        try {
+            Files.createDirectories(AUDIO_DIR);
+        } catch (IOException e) {
+            System.err.println("Не удалось создать папки: " + e.getMessage());
+            return;
+        }
+
+        MusicDownloader downloader = new MusicDownloader(AUDIO_DIR);
+        ProcessManager processManager = new ProcessManager();
+
+        if (!Files.exists(LINKS_FILE)) {
+            createLinksFile();
+        }
+
+        try (Scanner scanner = new Scanner(System.in)) {
+            boolean running = true;
+            while (running) {
+                System.out.println("\n=== МЕНЮ ===");
+                System.out.println("1. Скачать всю музыку");
+                System.out.println("2. Скачать и открыть Hip Hop 07");
+                System.out.println("3. Скачать и открыть Hip Hop 09");
+                System.out.println("4. Скачать и открыть Hip Hop 01");
+                System.out.println("5. Скачать и открыть Hip Hop 03");
+                System.out.println("6. Показать информацию о процессах");
+                System.out.println("0. Выход");
+                System.out.print("Ваш выбор: ");
+
+                String input = scanner.nextLine().trim();
+                if (input.isEmpty()) continue;
+
+                try {
+                    int choice = Integer.parseInt(input);
+
+                    switch (choice) {
+                        case 1:
+                            downloadAll(downloader);
+                            break;
+                        case 2, 3, 4, 5:
+                            int index = choice - 2;
+                            downloadAndPlay(downloader, processManager, index);
+                            break;
+                        case 6:
+                            processManager.displaySystemInfo();
+                            break;
+                        case 0:
+                            running = false;
+                            System.out.println("Программа завершена.");
+                            break;
+                        default:
+                            System.out.println("Нет такого пункта.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Ошибка: нужно ввести число!");
+                }
+            }
+        }
+    }
+
+    private static void createLinksFile() {
+        try (BufferedWriter writer = Files.newBufferedWriter(LINKS_FILE)) {
+            for (String url : TRACK_URLS) {
+                writer.write(url);
+                writer.newLine();
+            }
+            System.out.println("Файл ссылок создан: " + LINKS_FILE);
+        } catch (IOException e) {
+            System.err.println("Ошибка при создании файла ссылок: " + e.getMessage());
+        }
+    }
+
+    private static void downloadAll(MusicDownloader downloader) {
+        System.out.println("\nСкачиваем все треки...");
+        int count = 0;
+
+        for (int i = 0; i < TRACK_URLS.length; i++) {
+            try {
+                downloader.downloadTrack(TRACK_URLS[i], TRACK_NAMES[i]);
+                count++;
+            } catch (Exception e) {
+                System.err.println("Не удалось скачать " + TRACK_NAMES[i] + ": " + e.getMessage());
+            }
+        }
+        System.out.println("Итого скачано: " + count + " шт.");
+    }
+
+    private static void downloadAndPlay(MusicDownloader downloader, ProcessManager processManager, int index) {
+        if (index < 0 || index >= TRACK_URLS.length) return;
+
+        String url = TRACK_URLS[index];
+        String fileName = TRACK_NAMES[index];
+        Path savePath = AUDIO_DIR.resolve(fileName);
+
+        try {
+            System.out.println("\nСкачивание: " + fileName);
+            downloader.downloadTrack(url, fileName);
+            
+            System.out.println("Открываем плеер...");
+            processManager.launchPlayer(savePath, fileName);
+
+        } catch (Exception e) {
+            System.err.println("Ошибка воспроизведения: " + e.getMessage());
+        }
+    }
+}
