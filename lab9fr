@@ -1,0 +1,119 @@
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.CountDownLatch;
+
+public class lab9fr {
+
+    //синхронное копирование
+    public static void copySync(Path src, Path dst) throws IOException {
+        // Открываем два канала: на чтение и на запись
+        try (FileChannel in = FileChannel.open(src, StandardOpenOption.READ);
+             FileChannel out = FileChannel.open(dst,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.WRITE,
+                     StandardOpenOption.TRUNCATE_EXISTING)) {
+
+            ByteBuffer buf = ByteBuffer.allocate(4096);
+            int total = 0;
+
+            while (true) {
+                int n = in.read(buf);        // читаем в буфер (режим записи)
+                if (n == -1) break;          // конец файла
+
+                buf.flip();                  // переключаемся в режим чтения
+                while (buf.hasRemaining()) {
+                    out.write(buf);          // сливаем буфер в канал
+                }
+                buf.clear();                 // снова готовы писать в буфер
+                total += n;
+            }
+            System.out.println("[SYNC] скопировано байт: " + total);
+        }
+    }
+
+    // асинхронное копирование
+    public static void copyAsync(Path src, Path dst) throws Exception {
+        try (AsynchronousFileChannel in = AsynchronousFileChannel.open(
+                src, StandardOpenOption.READ);
+             AsynchronousFileChannel out = AsynchronousFileChannel.open(
+                     dst,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.WRITE,
+                     StandardOpenOption.TRUNCATE_EXISTING)) {
+
+            long size = Files.size(src);
+            ByteBuffer buf = ByteBuffer.allocate((int) size);
+            CountDownLatch latch = new CountDownLatch(1);
+
+            // асинхронное чтение всего файла в буфер
+            in.read(buf, 0, buf, new CompletionHandler<Integer, ByteBuffer>() {
+                @Override
+                public void completed(Integer bytesRead, ByteBuffer attachment) {
+                    // переключаем буфер в режим чтения
+                    attachment.flip();
+                    int length = attachment.remaining();
+
+                    // асинхронная запись буфера в выходной канал
+                    out.write(attachment, 0, attachment,
+                            new CompletionHandler<Integer, ByteBuffer>() {
+                                @Override
+                                public void completed(Integer bytesWritten, ByteBuffer b) {
+                                    System.out.println("[ASYNC] прочитано: " + bytesRead
+                                            + ", записано: " + bytesWritten);
+                                    latch.countDown();   // сигнал: всё готово
+                                }
+
+                                @Override
+                                public void failed(Throwable exc, ByteBuffer b) {
+                                    exc.printStackTrace();
+                                    latch.countDown();
+                                }
+                            });
+                }
+
+                @Override
+                public void failed(Throwable exc, ByteBuffer attachment) {
+                    exc.printStackTrace();
+                    latch.countDown();
+                }
+            });
+
+            // ждём завершения асинхронной операции
+            latch.await();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Path src = Paths.get("input.txt");
+        Path dstSync = Paths.get("output_sync.txt");
+        Path dstAsync = Paths.get("output_async.txt");
+
+        // готовим исходный файл, если его нет
+        if (!Files.exists(src)) {
+            Files.writeString(src, "тестовый файл для копирования.\n");
+        }
+
+        // синхронное копирование
+        long t1 = System.currentTimeMillis();
+        copySync(src, dstSync);
+        System.out.println("[SYNC] время, мс: " + (System.currentTimeMillis() - t1));
+
+        // асинхронное копирование
+        long t2 = System.currentTimeMillis();
+        copyAsync(src, dstAsync);
+        System.out.println("[ASYNC] время, мс: " + (System.currentTimeMillis() - t2));
+
+        // проверка: содержимое совпадает
+        System.out.println("Синхронная копия совпадает: "
+                + java.util.Arrays.equals(Files.readAllBytes(src), Files.readAllBytes(dstSync)));
+        System.out.println("Асинхронная копия совпадает: "
+                + java.util.Arrays.equals(Files.readAllBytes(src), Files.readAllBytes(dstAsync)));
+    }
+}
