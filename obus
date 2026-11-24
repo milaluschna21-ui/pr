@@ -1,0 +1,186 @@
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.regex.*;
+
+public class obus {
+
+    private static final Set<String> KEYWORDS = new HashSet<>(
+            Arrays.asList(
+                    "abstract", "assert", "boolean", "break", "byte",
+                    "case", "catch", "char", "class", "const",
+                    "continue", "default", "do", "double", "else",
+                    "enum", "extends", "final", "finally", "float",
+                    "for", "if", "implements", "import", "instanceof",
+                    "int", "interface", "long", "native", "new",
+                    "package", "private", "protected", "public",
+                    "return", "short", "static", "strictfp", "super",
+                    "switch", "synchronized", "this", "throw",
+                    "throws", "transient", "try", "void", "volatile",
+                    "while", "true", "false", "null", "var",
+                    "record", "sealed", "permits", "yield"
+            )
+    );
+
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("=== ОБФУСКАТОР JAVA ===");
+        System.out.print("Введите путь к директории: ");
+
+        String directory = scanner.nextLine();
+
+        System.out.print("Введите имя Java-файла: ");
+        String fileName = scanner.nextLine();
+
+        Path filePath = Paths.get(directory, fileName);
+
+        if (!Files.exists(filePath) ||
+                !fileName.endsWith(".java")) {
+
+            System.out.println("Файл не найден!");
+            return;
+        }
+
+        try {
+            String code = Files.readString(filePath);
+
+            //Удаление комментариев
+            code = removeComments(code);
+
+            //Сжатие кода
+            code = compressCode(code);
+
+            //Переименование класса
+            String oldClassName = fileName.substring(
+                    0, fileName.length() - 5
+            );
+
+            String newClassName = "halooooo";
+
+            code = code.replaceAll(
+                    "\\b" + Pattern.quote(oldClassName) + "\\b",
+                    newClassName
+            );
+
+            //Переименование идентификаторов
+            code = renameIdentifiers(code, newClassName);
+
+            //Сохранение результата
+            Path outputPath = Paths.get(
+                    directory, newClassName + ".java"
+            );
+
+            Files.writeString(outputPath, code);
+
+            System.out.println("\nОбфускация завершена!");
+            System.out.println("Результат: " + outputPath);
+
+        } catch (IOException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+    }
+
+    //Удаление комментариев с сохранением строковых литералов
+    private static String removeComments(String code) {
+
+        String regex = "\"(?:\\\\.|[^\"\\\\])*\"" + "|'(?:\\\\.|[^'\\\\])*'" + "|//[^\\r\\n]*" + "|/\\*[\\s\\S]*?\\*/";
+
+        Matcher matcher = Pattern.compile(regex).matcher(code);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            String value = matcher.group();
+
+            if (value.startsWith("//") ||
+                    value.startsWith("/*")) {
+                matcher.appendReplacement(result, " ");
+            } else {
+                matcher.appendReplacement(
+                        result, Matcher.quoteReplacement(value)
+                );
+            }
+        }
+
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    //Удаление лишних пробелов и переносов строк
+    private static String compressCode(String code) {
+
+        code = code.replaceAll("\\s+", " ");
+
+        return code.trim();
+    }
+
+    //Генерация коротких имен
+    private static String generateName(int number) {
+
+        String alphabet =
+                "abcdefghijklmnopqrstuvwxyz";
+
+        StringBuilder name = new StringBuilder();
+
+        do {
+            name.insert(0, alphabet.charAt(number % 26));
+            number = number / 26 - 1;
+        } while (number >= 0);
+
+        return name.toString();
+    }
+
+    //Переименование идентификаторов
+    private static String renameIdentifiers(
+            String code, String className) {
+
+        Pattern pattern = Pattern.compile(
+                "\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
+        );
+
+        Matcher matcher = pattern.matcher(code);
+
+        Map<String, String> names = new LinkedHashMap<>();
+
+        //Сначала находим идентификаторы
+        while (matcher.find()) {
+            String word = matcher.group();
+
+            if (!KEYWORDS.contains(word) &&
+                    !word.equals(className)) {
+
+                names.putIfAbsent(word, "");
+            }
+        }
+
+        //Генерируем короткие имена
+        int index = 0;
+
+        for (String name : names.keySet()) {
+            names.put(name, generateName(index++));
+        }
+
+        //Заменяем идентификаторы
+        matcher = pattern.matcher(code);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            String word = matcher.group();
+
+            String replacement = names.getOrDefault(
+                    word, word
+            );
+
+            matcher.appendReplacement(
+                    result,
+                    Matcher.quoteReplacement(replacement)
+            );
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+}
