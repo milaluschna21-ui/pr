@@ -1,0 +1,283 @@
+/**
+ * Демонстрационная программа для работы с билетами в кино и зрителями.
+ * <p>
+ * Программа показывает применение классов, наследование,
+ * а также объединение возможностей билета и зрителя в классе {@link TicketViewer}.
+ * </p>
+ *
+ */
+public class Main {
+
+    /**
+     * Конструктор главного класса.
+     * Создание экземпляров класса Main не требуется.
+     */
+    public Main() {
+    }
+
+    /**
+     * Запускает программу, создаёт примеры билетов и зрителей
+     * и демонстрирует покупку билета.
+     *
+     * @param args аргументы командной строки
+     */
+    public static void main(String[] args) {
+        Ticket T1 = new CinemaTicket("Дюна 2", 450, 5.0);
+        Ticket T2 = new CinemaTicket2("Оппенгеймер", 600, 4.8);
+        Ticket T3 = new CinemaTicket3("Барби", 350, 4.2);
+
+        Viewer V1 = new Viewer1("Ivan", "PassIvan1");
+        Viewer V2 = new Viewer2("Anna", "PassAnna2");
+        Viewer V3 = new Viewer3("Oleg", "PassOleg3");
+
+        TicketViewer TV = new TicketViewer("Masha", "PassMasha", "Гарри Поттер", 500, 4.9);
+
+        TV.buyTicket();
+    }
+}
+
+/**
+ * Базовый класс билета в кино.
+ * Хранит название фильма, стоимость билета и рейтинг фильма.
+ */
+class Ticket {
+    /** Название фильма. */
+    String movieName;
+
+    /** Стоимость билета. */
+    int price;
+
+    /** Рейтинг фильма. */
+    double rating;
+
+    /**
+     * Создаёт билет с указанными характеристиками.
+     *
+     * @param movieName название фильма
+     * @param price стоимость билета
+     * @param rating рейтинг фильма
+     */
+    public Ticket(String movieName, int price, double rating) {
+        this.movieName = movieName;
+        this.price = price;
+        this.rating = rating;
+    }
+
+    /**
+     * Выводит название фильма в консоль.
+     */
+    public void showMovie() {
+        System.out.println("Фильм: " + movieName);
+    }
+
+    /**
+     * Выводит цену билета в консоль.
+     */
+    public void showPrice() {
+        System.out.println("Цена билета: " + price);
+    }
+
+    /**
+     * Выводит рейтинг фильма в консоль.
+     */
+    public void showRating() {
+        System.out.println("Рейтинг: " + rating);
+    }
+}
+
+/**
+ * Первый вариант билета, наследующий базовый {@link Ticket}.
+ */
+class CinemaTicket extends Ticket {
+    /**
+     * Создаёт билет с указанными характеристиками.
+     *
+     * @param movieName название фильма
+     * @param price стоимость билета
+     * @param rating рейтинг фильма
+     */
+    public CinemaTicket(String movieName, int price, double rating) {
+        super(movieName, price, rating);
+    }
+}
+
+/**
+ * Второй вариант билета, наследующий базовый {@link Ticket}.
+ */
+class CinemaTicket2 extends Ticket {
+    /**
+     * Создаёт второй вариант билета.
+     *
+     * @param movieName название фильма
+     * @param price стоимость билета
+     * @param rating рейтинг фильма
+     */
+    public CinemaTicket2(String movieName, int price, double rating) {
+        super(movieName, price, rating);
+    }
+}
+
+/**
+ * Третий вариант билета, наследующий базовый {@link Ticket}.
+ */
+class CinemaTicket3 extends Ticket {
+    /**
+     * Создаёт третий вариант билета.
+     *
+     * @param movieName название фильма
+     * @param price стоимость билета
+     * @param rating рейтинг фильма
+     */
+    public CinemaTicket3(String movieName, int price, double rating) {
+        super(movieName, price, rating);
+    }
+}
+
+/**
+ * Базовый класс зрителя (покупателя).
+ */
+class Viewer {
+    /** Логин зрителя. */
+    private String login;
+
+    /** Пароль зрителя. */
+    private String password;
+
+    /**
+     * Создаёт зрителя с заданными логином и паролем.
+     *
+     * @param login логин зрителя
+     * @param password пароль зрителя
+     */
+    public Viewer(String login, String password) {
+        this.login = login;
+        this.password = password;
+    }
+
+    /**
+     * Выводит логин зрителя в консоль.
+     */
+    public void printLogin() {
+        System.out.println("Логин зрителя: " + login);
+    }
+
+    /**
+     * Выводит пароль зрителя в консоль.
+     */
+    public void printPassword() {
+        System.out.println("Пароль: " + password);
+    }
+
+    /**
+     * Возвращает логин зрителя.
+     *
+     * @return строка, содержащая логин зрителя
+     */
+    public String getLogin() {
+        return this.login;
+    }
+}
+
+/**
+ * Класс первого зрителя, наследующий базовый {@link Viewer}.
+ */
+class Viewer1 extends Viewer {
+    /**
+     * Создаёт зрителя с заданными логином и паролем.
+     *
+     * @param login логин зрителя
+     * @param password пароль зрителя
+     */
+    public Viewer1(String login, String password) {
+        super(login, password);
+    }
+}
+
+/**
+ * Класс второго зрителя, наследующий базовый {@link Viewer}.
+ */
+class Viewer2 extends Viewer {
+    /**
+     * Создаёт второго зрителя.
+     *
+     * @param login логин зрителя
+     * @param password пароль зрителя
+     */
+    public Viewer2(String login, String password) {
+        super(login, password);
+    }
+}
+
+/**
+ * Класс третьего зрителя, наследующий базовый {@link Viewer}.
+ */
+class Viewer3 extends Viewer {
+    /**
+     * Создаёт третьего зрителя.
+     *
+     * @param login логин зрителя
+     * @param password пароль зрителя
+     */
+    public Viewer3(String login, String password) {
+        super(login, password);
+    }
+}
+
+/**
+ * Класс, объединяющий данные зрителя и характеристики билета.
+ * Наследует класс {@link Viewer} и содержит внутри себя билет.
+ */
+class TicketViewer extends Viewer {
+    /** Название фильма. */
+    String movieName;
+
+    /** Стоимость билета. */
+    int price;
+
+    /** Рейтинг фильма. */
+    double rating;
+
+    /**
+     * Создаёт объект, содержащий данные зрителя и билета.
+     *
+     * @param login логин зрителя
+     * @param password пароль зрителя
+     * @param movieName название фильма
+     * @param price стоимость билета
+     * @param rating рейтинг фильма
+     */
+    public TicketViewer(String login, String password, String movieName, int price, double rating) {
+        super(login, password);
+        this.movieName = movieName;
+        this.price = price;
+        this.rating = rating;
+    }
+
+    /**
+     * Выводит название фильма в консоль.
+     */
+    public void showMovie() {
+        System.out.println("Фильм: " + movieName);
+    }
+
+    /**
+     * Выводит стоимость билета в консоль.
+     */
+    public void showPrice() {
+        System.out.println("Стоимость: " + price);
+    }
+
+    /**
+     * Выводит рейтинг фильма в консоль.
+     */
+    public void showRating() {
+        System.out.println("Рейтинг: " + rating);
+    }
+
+    /**
+     * Выводит сообщение о покупке билета зрителем.
+     */
+    public void buyTicket() {
+        System.out.println("Зритель " + getLogin() + " купил билет на фильм '" + movieName + "' за " + price + " руб.");
+    }
+}
