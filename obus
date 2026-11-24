@@ -27,7 +27,6 @@ public class obus {
 
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("=== ОБФУСКАТОР JAVA ===");
         System.out.print("Введите путь к директории: ");
 
         String directory = scanner.nextLine();
