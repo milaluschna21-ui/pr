@@ -1,0 +1,47 @@
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class opredelenie_file {
+
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Введите путь к файлу:");
+        String fileName = scanner.nextLine();
+
+        try {
+            FileInputStream file = new FileInputStream(fileName);
+
+            int b1 = file.read();
+            int b2 = file.read();
+            int b3 = file.read();
+            int b4 = file.read();
+
+            file.close();
+
+            if (b1 == 0xFF && b2 == 0xD8 && b3 == 0xFF) {
+                System.out.println("Это JPG файл");
+            }
+            else if (b1 == 0x89 && b2 == 0x50 && b3 == 0x4E && b4 == 0x47) {
+                System.out.println("Это PNG файл");
+            }
+            else if (b1 == 0x47 && b2 == 0x49 && b3 == 0x46) {
+                System.out.println("Это GIF файл");
+            }
+            else if (b1 == 0x49 && b2 == 0x44 && b3 == 0x33) {
+                System.out.println("Это MP3 файл");
+            }
+            else {
+                System.out.println("Неизвестный тип файла");
+            }
+
+        } catch (IOException e) {
+            System.out.println("Ошибка! Файл не найден.");
+        }
+
+        scanner.close();
+    }
+}
